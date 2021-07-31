@@ -2,6 +2,7 @@
 [![Tantalor93](https://circleci.com/gh/Tantalor93/doh-go/tree/main.svg?style=svg)](https://circleci.com/gh/Tantalor93/doh-go?branch=main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Tantalor93/doh-go/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/Tantalor93/doh-go/branch/main/graph/badge.svg?token=MC6PK2OLMK)](https://codecov.io/gh/Tantalor93/doh-go)
+[![](https://godoc.org/github.com/Tantalor93/doh-go/doh?status.svg)](https://godoc.org/github.com/tantalor93/doh-go/doh)
 
 # doh-go
 DoH client written in Golang with minimal dependencies, built on top of https://github.com/miekg/dns
