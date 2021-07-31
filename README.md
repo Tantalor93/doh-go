@@ -7,3 +7,23 @@ add dependency
 ```
 go get github.com/tantalor93/doh-go
 ```
+
+## Examples
+```
+// create client
+c := doh.NewClient(nil)
+
+// prepare payload
+msg := dns.Msg{}
+msg.SetQuestion("google.com.", dns.TypeA)
+
+// send to Cloudflare Server over DoH
+r, err := c.PostSend(context.Background(), "https://1.1.1.1", &msg)
+
+if err != nil {
+    panic(err)
+}
+
+// do something with response
+fmt.Println(dns.RcodeToString[r.Rcode])
+```
