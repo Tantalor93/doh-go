@@ -3,7 +3,9 @@ package doh
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/miekg/dns"
@@ -37,7 +39,29 @@ func (dc *Client) PostSend(ctx context.Context, server string, msg *dns.Msg) (*d
 	request.Header.Set("Accept", "application/dns-message")
 	request.Header.Set("content-type", "application/dns-message")
 
-	resp, err := dc.c.Do(request)
+	return dc.send(request)
+}
+
+// GetSend sends DNS message to the given DNS server over DoH using GET, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
+func (dc *Client) GetSend(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
+	pack, err := msg.Pack()
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprint(server, "/dns-query?dns=", base64.URLEncoding.EncodeToString(pack))
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	request = request.WithContext(ctx)
+	request.Header.Set("Accept", "application/dns-message")
+
+	return dc.send(request)
+}
+
+func (dc *Client) send(r *http.Request) (*dns.Msg, error) {
+	resp, err := dc.c.Do(r)
 	if err != nil {
 		return nil, err
 	}
