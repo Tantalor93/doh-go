@@ -24,7 +24,7 @@ msg := dns.Msg{}
 msg.SetQuestion("google.com.", dns.TypeA)
 
 // send DNS query to Cloudflare Server over DoH using POST method
-r, err := c.PostSend(context.Background(), "https://1.1.1.1", &msg)
+r, err := c.SendViaPost(context.Background(), "https://1.1.1.1/dns-query", &msg)
 if err != nil {
     panic(err)
 }
@@ -33,7 +33,7 @@ if err != nil {
 fmt.Println(dns.RcodeToString[r.Rcode])
 
 // send DNS query to Cloudflare Server over DoH using GET method
-r, err = c.GetSend(context.Background(), "https://1.1.1.1", &msg)
+r, err = c.SendViaGet(context.Background(), "https://1.1.1.1/dns-query", &msg)
 if err != nil {
     panic(err)
 }

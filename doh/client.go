@@ -24,14 +24,14 @@ func NewClient(c *http.Client) *Client {
 	return &Client{c}
 }
 
-// PostSend sends DNS message to the given DNS server over DoH using POST, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
-func (dc *Client) PostSend(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
+// SendViaPost sends DNS message to the given DNS server over DoH using POST, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
+func (dc *Client) SendViaPost(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
 	pack, err := msg.Pack()
 	if err != nil {
 		return nil, err
 	}
 
-	request, err := http.NewRequest("POST", server+"/dns-query", bytes.NewReader(pack))
+	request, err := http.NewRequest("POST", server, bytes.NewReader(pack))
 	if err != nil {
 		return nil, err
 	}
@@ -42,14 +42,14 @@ func (dc *Client) PostSend(ctx context.Context, server string, msg *dns.Msg) (*d
 	return dc.send(request)
 }
 
-// GetSend sends DNS message to the given DNS server over DoH using GET, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
-func (dc *Client) GetSend(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
+// SendViaGet sends DNS message to the given DNS server over DoH using GET, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
+func (dc *Client) SendViaGet(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
 	pack, err := msg.Pack()
 	if err != nil {
 		return nil, err
 	}
 
-	url := fmt.Sprint(server, "/dns-query?dns=", base64.URLEncoding.EncodeToString(pack))
+	url := fmt.Sprint(server, "?dns=", base64.URLEncoding.EncodeToString(pack))
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
