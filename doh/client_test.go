@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_PostSend(t *testing.T) {
+func Test_SendViaPost(t *testing.T) {
 	type args struct {
 		server string
 		msg    *dns.Msg
@@ -21,12 +21,12 @@ func Test_PostSend(t *testing.T) {
 	}{
 		{
 			name:      "NOERROR DNS resolution",
-			args:      args{server: "https://1.1.1.1", msg: question("google.com.")},
+			args:      args{server: "https://1.1.1.1/dns-query", msg: question("google.com.")},
 			wantRcode: dns.RcodeSuccess,
 		},
 		{
 			name:      "NXDOMAIN DNS resolution ",
-			args:      args{server: "https://1.1.1.1", msg: question("nxdomain.cz.")},
+			args:      args{server: "https://1.1.1.1/dns-query", msg: question("nxdomain.cz.")},
 			wantRcode: dns.RcodeNameError,
 		},
 	}
@@ -34,19 +34,19 @@ func Test_PostSend(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client := NewClient(nil)
 
-			got, err := client.PostSend(context.Background(), tt.args.server, tt.args.msg)
+			got, err := client.SendViaPost(context.Background(), tt.args.server, tt.args.msg)
 
 			if tt.wantErr {
-				assert.Error(t, err, "PostSend() error")
+				assert.Error(t, err, "SendViaPost() error")
 			} else {
-				assert.NotNil(t, got, "PostSend() response")
-				assert.Equal(t, tt.wantRcode, got.Rcode, "PostSend() rcode")
+				assert.NotNil(t, got, "SendViaPost() response")
+				assert.Equal(t, tt.wantRcode, got.Rcode, "SendViaPost() rcode")
 			}
 		})
 	}
 }
 
-func Test_GetSend(t *testing.T) {
+func Test_SendViaGet(t *testing.T) {
 	type args struct {
 		server string
 		msg    *dns.Msg
@@ -59,12 +59,12 @@ func Test_GetSend(t *testing.T) {
 	}{
 		{
 			name:      "NOERROR DNS resolution",
-			args:      args{server: "https://1.1.1.1", msg: question("google.com.")},
+			args:      args{server: "https://1.1.1.1/dns-query", msg: question("google.com.")},
 			wantRcode: dns.RcodeSuccess,
 		},
 		{
 			name:      "NXDOMAIN DNS resolution ",
-			args:      args{server: "https://1.1.1.1", msg: question("nxdomain.cz.")},
+			args:      args{server: "https://1.1.1.1/dns-query", msg: question("nxdomain.cz.")},
 			wantRcode: dns.RcodeNameError,
 		},
 	}
@@ -72,13 +72,13 @@ func Test_GetSend(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client := NewClient(nil)
 
-			got, err := client.GetSend(context.Background(), tt.args.server, tt.args.msg)
+			got, err := client.SendViaGet(context.Background(), tt.args.server, tt.args.msg)
 
 			if tt.wantErr {
-				assert.Error(t, err, "GetSend() error")
+				assert.Error(t, err, "SendViaGet() error")
 			} else {
-				assert.NotNil(t, got, "GetSend() response")
-				assert.Equal(t, tt.wantRcode, got.Rcode, "GetSend() rcode")
+				assert.NotNil(t, got, "SendViaGet() response")
+				assert.Equal(t, tt.wantRcode, got.Rcode, "SendViaGet() rcode")
 			}
 		})
 	}
