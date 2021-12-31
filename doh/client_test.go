@@ -2,13 +2,49 @@ package doh
 
 import (
 	"context"
+	"encoding/base64"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+const(
+	existingDomain = "google.com."
+	notExistingDomain = "nxdomain.cz."
 )
 
 func Test_SendViaPost(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bd, err := ioutil.ReadAll(r.Body)
+
+		msg := dns.Msg{}
+		err = msg.Unpack(bd)
+		require.NoError(t, err, "error unpacking request body")
+		require.Len(t, msg.Question, 1, "single question expected")
+
+		resp := dns.Msg{}
+		switch msg.Question[0].Name {
+		case notExistingDomain:
+			resp.Rcode = dns.RcodeNameError
+		case existingDomain:
+			resp.Rcode = dns.RcodeSuccess
+		default:
+			require.FailNow(t, "unexpected question name")
+		}
+
+		pack, err := resp.Pack()
+		require.NoError(t, err, "error packing response")
+
+		_, err = w.Write(pack)
+		require.NoError(t, err, "error writing response")
+	}))
+	defer ts.Close()
+
 	type args struct {
 		server string
 		msg    *dns.Msg
@@ -21,12 +57,12 @@ func Test_SendViaPost(t *testing.T) {
 	}{
 		{
 			name:      "NOERROR DNS resolution",
-			args:      args{server: "https://1.1.1.1/dns-query", msg: question("google.com.")},
+			args:      args{server: ts.URL, msg: question(existingDomain)},
 			wantRcode: dns.RcodeSuccess,
 		},
 		{
-			name:      "NXDOMAIN DNS resolution ",
-			args:      args{server: "https://1.1.1.1/dns-query", msg: question("nxdomain.cz.")},
+			name:      "NXDOMAIN DNS resolution",
+			args:      args{server: ts.URL, msg: question(notExistingDomain)},
 			wantRcode: dns.RcodeNameError,
 		},
 	}
@@ -37,8 +73,9 @@ func Test_SendViaPost(t *testing.T) {
 			got, err := client.SendViaPost(context.Background(), tt.args.server, tt.args.msg)
 
 			if tt.wantErr {
-				assert.Error(t, err, "SendViaPost() error")
+				require.Error(t, err, "SendViaPost() error")
 			} else {
+				require.NoError(t, err)
 				assert.NotNil(t, got, "SendViaPost() response")
 				assert.Equal(t, tt.wantRcode, got.Rcode, "SendViaPost() rcode")
 			}
@@ -47,6 +84,37 @@ func Test_SendViaPost(t *testing.T) {
 }
 
 func Test_SendViaGet(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		dnsQryParam := query.Get("dns")
+		require.NotEmpty(t, dnsQryParam, "expected dns query param not found")
+
+		bd, err := base64.StdEncoding.DecodeString(dnsQryParam)
+		require.NoError(t, err, "error decoding query param DNS")
+
+		msg := dns.Msg{}
+		err = msg.Unpack(bd)
+		require.NoError(t, err, "error unpacking request body")
+		require.Len(t, msg.Question, 1, "single question expected")
+
+		resp := dns.Msg{}
+		switch msg.Question[0].Name {
+		case notExistingDomain:
+			resp.Rcode = dns.RcodeNameError
+		case existingDomain:
+			resp.Rcode = dns.RcodeSuccess
+		default:
+			require.FailNow(t, "unexpected question name")
+		}
+
+		pack, err := resp.Pack()
+		require.NoError(t, err, "error packing response")
+
+		_, err = w.Write(pack)
+		require.NoError(t, err, "error writing response")
+	}))
+	defer ts.Close()
+
 	type args struct {
 		server string
 		msg    *dns.Msg
@@ -59,12 +127,12 @@ func Test_SendViaGet(t *testing.T) {
 	}{
 		{
 			name:      "NOERROR DNS resolution",
-			args:      args{server: "https://1.1.1.1/dns-query", msg: question("google.com.")},
+			args:      args{server: ts.URL, msg: question(existingDomain)},
 			wantRcode: dns.RcodeSuccess,
 		},
 		{
-			name:      "NXDOMAIN DNS resolution ",
-			args:      args{server: "https://1.1.1.1/dns-query", msg: question("nxdomain.cz.")},
+			name:      "NXDOMAIN DNS resolution",
+			args:      args{server: ts.URL, msg: question(notExistingDomain)},
 			wantRcode: dns.RcodeNameError,
 		},
 	}
@@ -75,8 +143,9 @@ func Test_SendViaGet(t *testing.T) {
 			got, err := client.SendViaGet(context.Background(), tt.args.server, tt.args.msg)
 
 			if tt.wantErr {
-				assert.Error(t, err, "SendViaGet() error")
+				require.Error(t, err, "SendViaGet() error")
 			} else {
+				require.NoError(t, err)
 				assert.NotNil(t, got, "SendViaGet() response")
 				assert.Equal(t, tt.wantRcode, got.Rcode, "SendViaGet() rcode")
 			}
