@@ -27,7 +27,7 @@ func Test_SendViaPost(t *testing.T) {
 		require.NoError(t, err, "error unpacking request body")
 		require.Len(t, msg.Question, 1, "single question expected")
 
-		resp := dns.Msg{}
+		resp := msg
 		switch msg.Question[0].Name {
 		case notExistingDomain:
 			resp.Rcode = dns.RcodeNameError
@@ -97,7 +97,7 @@ func Test_SendViaGet(t *testing.T) {
 		require.NoError(t, err, "error unpacking request body")
 		require.Len(t, msg.Question, 1, "single question expected")
 
-		resp := dns.Msg{}
+		resp := msg
 		switch msg.Question[0].Name {
 		case notExistingDomain:
 			resp.Rcode = dns.RcodeNameError
