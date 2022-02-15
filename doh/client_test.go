@@ -89,7 +89,7 @@ func Test_SendViaGet(t *testing.T) {
 		dnsQryParam := query.Get("dns")
 		require.NotEmpty(t, dnsQryParam, "expected dns query param not found")
 
-		bd, err := base64.StdEncoding.DecodeString(dnsQryParam)
+		bd, err := base64.RawURLEncoding.DecodeString(dnsQryParam)
 		require.NoError(t, err, "error decoding query param DNS")
 
 		msg := dns.Msg{}

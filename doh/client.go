@@ -49,7 +49,7 @@ func (dc *Client) SendViaGet(ctx context.Context, server string, msg *dns.Msg) (
 		return nil, err
 	}
 
-	url := fmt.Sprint(server, "?dns=", base64.URLEncoding.EncodeToString(pack))
+	url := fmt.Sprint(server, "?dns=", base64.RawURLEncoding.EncodeToString(pack))
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
