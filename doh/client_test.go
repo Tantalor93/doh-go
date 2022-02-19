@@ -13,19 +13,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const(
-	existingDomain = "google.com."
+const (
+	existingDomain    = "google.com."
 	notExistingDomain = "nxdomain.cz."
 )
 
 func Test_SendViaPost(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bd, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
 
 		msg := dns.Msg{}
 		err = msg.Unpack(bd)
-		require.NoError(t, err, "error unpacking request body")
-		require.Len(t, msg.Question, 1, "single question expected")
+		if err != nil {
+			panic(err)
+		}
 
 		resp := msg
 		switch msg.Question[0].Name {
@@ -34,14 +38,18 @@ func Test_SendViaPost(t *testing.T) {
 		case existingDomain:
 			resp.Rcode = dns.RcodeSuccess
 		default:
-			require.FailNow(t, "unexpected question name")
+			panic("unexpected question name")
 		}
 
 		pack, err := resp.Pack()
-		require.NoError(t, err, "error packing response")
+		if err != nil {
+			panic(err)
+		}
 
 		_, err = w.Write(pack)
-		require.NoError(t, err, "error writing response")
+		if err != nil {
+			panic(err)
+		}
 	}))
 	defer ts.Close()
 
@@ -87,15 +95,17 @@ func Test_SendViaGet(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 		dnsQryParam := query.Get("dns")
-		require.NotEmpty(t, dnsQryParam, "expected dns query param not found")
 
 		bd, err := base64.RawURLEncoding.DecodeString(dnsQryParam)
-		require.NoError(t, err, "error decoding query param DNS")
+		if err != nil {
+			panic(err)
+		}
 
 		msg := dns.Msg{}
 		err = msg.Unpack(bd)
-		require.NoError(t, err, "error unpacking request body")
-		require.Len(t, msg.Question, 1, "single question expected")
+		if err != nil {
+			panic(err)
+		}
 
 		resp := msg
 		switch msg.Question[0].Name {
@@ -104,14 +114,18 @@ func Test_SendViaGet(t *testing.T) {
 		case existingDomain:
 			resp.Rcode = dns.RcodeSuccess
 		default:
-			require.FailNow(t, "unexpected question name")
+			panic("unexpected question name")
 		}
 
 		pack, err := resp.Pack()
-		require.NoError(t, err, "error packing response")
+		if err != nil {
+			panic(err)
+		}
 
 		_, err = w.Write(pack)
-		require.NoError(t, err, "error writing response")
+		if err != nil {
+			panic(err)
+		}
 	}))
 	defer ts.Close()
 
