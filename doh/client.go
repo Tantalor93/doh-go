@@ -11,7 +11,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-// Client encapsulates and provides logic for querying DNS servers over DoH
+// Client encapsulates and provides logic for querying DNS servers over DoH.
 type Client struct {
 	c *http.Client
 }
