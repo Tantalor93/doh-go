@@ -1,18 +1,17 @@
-name: golangci-lint
+name: lint
 on:
   pull_request:
 jobs:
   golangci:
-    name: lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install Go
+      uses: actions/setup-go@v4
       with:
-        go-version: 1.17.x
-    - uses: actions/checkout@v3
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      env:
-        GOPROXY: proxy.golang.org,direct
+        go-version-file: go.mod
+    - name: Lint
+      uses: wandera/golangci-lint-action@v3
       with:
-        version: v1.45.2
+        version: v1.51.2
