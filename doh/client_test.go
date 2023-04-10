@@ -3,7 +3,7 @@ package doh
 import (
 	"context"
 	"encoding/base64"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,7 +20,7 @@ const (
 
 func Test_SendViaPost(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		bd, err := ioutil.ReadAll(r.Body)
+		bd, err := io.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
 		}
