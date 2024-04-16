@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -68,7 +67,7 @@ func (dc *Client) send(r *http.Request) (*dns.Msg, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("unexpected HTTP status")
+		return nil, UnexpectedServerHTTPStatusError{code: resp.StatusCode}
 	}
 
 	buffer := bytes.Buffer{}
