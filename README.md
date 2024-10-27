@@ -19,14 +19,14 @@ go get github.com/tantalor93/doh-go
 
 ## Examples
 ```
-// create client with default settings
+// create client with default settings resolving via CloudFlare DoH Server
 c := doh.NewClient("https://1.1.1.1/dns-query")
 
 // prepare payload
 msg := dns.Msg{}
 msg.SetQuestion("google.com.", dns.TypeA)
 
-// send DNS query to Cloudflare Server over DoH using POST method
+// send DNS query using HTTP POST method
 r, err := c.SendViaPost(context.Background(), &msg)
 if err != nil {
     panic(err)
@@ -35,8 +35,8 @@ if err != nil {
 // do something with response
 fmt.Println(dns.RcodeToString[r.Rcode])
 
-// send DNS query to Cloudflare Server over DoH using GET method
-r, err = c.SendViaGet(context.Background(), "https://1.1.1.1/dns-query", &msg)
+// send DNS query using HTTP GET method
+r, err = c.SendViaGet(context.Background(), &msg)
 if err != nil {
     panic(err)
 }
