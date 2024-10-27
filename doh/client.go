@@ -12,18 +12,21 @@ import (
 
 // Client encapsulates and provides logic for querying DNS servers over DoH.
 type Client struct {
-	c *http.Client
+	client *http.Client
 }
 
-// NewClient creates new Client instance with standard net/http client. If nil, default http.Client is used.
-func NewClient(c *http.Client) *Client {
-	if c == nil {
-		c = &http.Client{}
+// NewClient creates new Client instance with standard net/http client.
+func NewClient(opts ...Option) *Client {
+	client := &Client{
+		client: &http.Client{},
 	}
-	return &Client{c}
+	for _, opt := range opts {
+		opt.apply(client)
+	}
+	return client
 }
 
-// SendViaPost sends DNS message to the given DNS server over DoH using POST, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
+// SendViaPost sends DNS message to the given DNS server over DoH using POST method, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
 func (dc *Client) SendViaPost(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
 	pack, err := msg.Pack()
 	if err != nil {
@@ -41,7 +44,7 @@ func (dc *Client) SendViaPost(ctx context.Context, server string, msg *dns.Msg) 
 	return dc.send(request)
 }
 
-// SendViaGet sends DNS message to the given DNS server over DoH using GET, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
+// SendViaGet sends DNS message to the given DNS server over DoH using GET method, see https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
 func (dc *Client) SendViaGet(ctx context.Context, server string, msg *dns.Msg) (*dns.Msg, error) {
 	pack, err := msg.Pack()
 	if err != nil {
@@ -60,7 +63,7 @@ func (dc *Client) SendViaGet(ctx context.Context, server string, msg *dns.Msg) (
 }
 
 func (dc *Client) send(r *http.Request) (*dns.Msg, error) {
-	resp, err := dc.c.Do(r)
+	resp, err := dc.client.Do(r)
 	if err != nil {
 		return nil, err
 	}

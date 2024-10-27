@@ -19,8 +19,8 @@ go get github.com/tantalor93/doh-go
 
 ## Examples
 ```
-// create client with default http.Client
-c := doh.NewClient(nil)
+// create client with default settings
+c := doh.NewClient()
 
 // prepare payload
 msg := dns.Msg{}
