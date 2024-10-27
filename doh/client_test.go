@@ -58,37 +58,33 @@ func Test_SendViaPost(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	type args struct {
-		server string
-		msg    *dns.Msg
-	}
 	tests := []struct {
 		name      string
-		args      args
+		msg       *dns.Msg
 		wantRcode int
 		wantErr   error
 	}{
 		{
 			name:      "NOERROR DNS resolution",
-			args:      args{server: ts.URL, msg: question(existingDomain)},
+			msg:       question(existingDomain),
 			wantRcode: dns.RcodeSuccess,
 		},
 		{
 			name:      "NXDOMAIN DNS resolution",
-			args:      args{server: ts.URL, msg: question(notExistingDomain)},
+			msg:       question(notExistingDomain),
 			wantRcode: dns.RcodeNameError,
 		},
 		{
 			name:    "bad upstream HTTP response",
-			args:    args{server: ts.URL, msg: question(badStatusDomain)},
+			msg:     question(badStatusDomain),
 			wantErr: &doh.UnexpectedServerHTTPStatusError{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := doh.NewClient(nil)
+			client := doh.NewClient(ts.URL)
 
-			got, err := client.SendViaPost(context.Background(), tt.args.server, tt.args.msg)
+			got, err := client.SendViaPost(context.Background(), tt.msg)
 
 			if tt.wantErr != nil {
 				require.ErrorAs(t, err, tt.wantErr, "SendViaPost() error")
@@ -142,37 +138,33 @@ func Test_SendViaGet(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	type args struct {
-		server string
-		msg    *dns.Msg
-	}
 	tests := []struct {
 		name      string
-		args      args
+		msg       *dns.Msg
 		wantRcode int
 		wantErr   error
 	}{
 		{
 			name:      "NOERROR DNS resolution",
-			args:      args{server: ts.URL, msg: question(existingDomain)},
+			msg:       question(existingDomain),
 			wantRcode: dns.RcodeSuccess,
 		},
 		{
 			name:      "NXDOMAIN DNS resolution",
-			args:      args{server: ts.URL, msg: question(notExistingDomain)},
+			msg:       question(notExistingDomain),
 			wantRcode: dns.RcodeNameError,
 		},
 		{
 			name:    "bad upstream HTTP response",
-			args:    args{server: ts.URL, msg: question(badStatusDomain)},
+			msg:     question(badStatusDomain),
 			wantErr: &doh.UnexpectedServerHTTPStatusError{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := doh.NewClient(nil)
+			client := doh.NewClient(ts.URL)
 
-			got, err := client.SendViaGet(context.Background(), tt.args.server, tt.args.msg)
+			got, err := client.SendViaGet(context.Background(), tt.msg)
 
 			if tt.wantErr != nil {
 				require.ErrorAs(t, err, tt.wantErr, "SendViaPost() error")
