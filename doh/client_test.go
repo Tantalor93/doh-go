@@ -82,9 +82,9 @@ func Test_SendViaPost(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := doh.NewClient()
+			client := doh.NewClient(ts.URL)
 
-			got, err := client.SendViaPost(context.Background(), ts.URL, tt.msg)
+			got, err := client.SendViaPost(context.Background(), tt.msg)
 
 			if tt.wantErr != nil {
 				require.ErrorAs(t, err, tt.wantErr, "SendViaPost() error")
@@ -162,9 +162,9 @@ func Test_SendViaGet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := doh.NewClient()
+			client := doh.NewClient(ts.URL)
 
-			got, err := client.SendViaGet(context.Background(), ts.URL, tt.msg)
+			got, err := client.SendViaGet(context.Background(), tt.msg)
 
 			if tt.wantErr != nil {
 				require.ErrorAs(t, err, tt.wantErr, "SendViaPost() error")
