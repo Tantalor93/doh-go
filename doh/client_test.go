@@ -40,7 +40,7 @@ func Test_SendViaPost(t *testing.T) {
 		case existingDomain:
 			resp.Rcode = dns.RcodeSuccess
 		case badStatusDomain:
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		default:
 			panic("unexpected question name")
@@ -87,6 +87,7 @@ func Test_SendViaPost(t *testing.T) {
 			got, err := client.SendViaPost(context.Background(), tt.msg)
 
 			if tt.wantErr != nil {
+				// nolint:testifylint
 				require.ErrorAs(t, err, tt.wantErr, "SendViaPost() error")
 			} else {
 				require.NoError(t, err)
@@ -120,7 +121,7 @@ func Test_SendViaGet(t *testing.T) {
 		case existingDomain:
 			resp.Rcode = dns.RcodeSuccess
 		case badStatusDomain:
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		default:
 			panic("unexpected question name")
@@ -167,6 +168,7 @@ func Test_SendViaGet(t *testing.T) {
 			got, err := client.SendViaGet(context.Background(), tt.msg)
 
 			if tt.wantErr != nil {
+				// nolint:testifylint
 				require.ErrorAs(t, err, tt.wantErr, "SendViaPost() error")
 			} else {
 				require.NoError(t, err)

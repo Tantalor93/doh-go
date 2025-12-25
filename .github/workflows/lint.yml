@@ -8,13 +8,13 @@ jobs:
   golangci:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Install Go
-      uses: actions/setup-go@v4
-      with:
-        go-version-file: go.mod
-    - name: Lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: v1.51.2
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.1.6
