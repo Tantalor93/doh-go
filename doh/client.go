@@ -35,7 +35,7 @@ func (c *Client) SendViaPost(ctx context.Context, msg *dns.Msg) (*dns.Msg, error
 		return nil, err
 	}
 
-	request, err := http.NewRequest("POST", c.addr, bytes.NewReader(pack))
+	request, err := http.NewRequest(http.MethodPost, c.addr, bytes.NewReader(pack))
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *Client) SendViaGet(ctx context.Context, msg *dns.Msg) (*dns.Msg, error)
 	}
 
 	url := fmt.Sprint(c.addr, "?dns=", base64.RawURLEncoding.EncodeToString(pack))
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
