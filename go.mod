@@ -3,7 +3,7 @@ module github.com/tantalor93/doh-go
 go 1.24.0
 
 require (
-	github.com/miekg/dns v1.1.70
+	github.com/miekg/dns v1.1.72
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/net v0.48.0
 )
