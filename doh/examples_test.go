@@ -48,7 +48,7 @@ func ExampleClient_SendViaGet() {
 	// Output: NOERROR
 }
 
-func ExampleClient_http2() {
+func ExampleClient_SendViaGet_http2() {
 	// create client with default settings resolving via CloudFlare DoH Server
 	httpClient := http.Client{Transport: &http2.Transport{}}
 	c := doh.NewClient("https://1.1.1.1/dns-query", doh.WithHTTPClient(&httpClient))
