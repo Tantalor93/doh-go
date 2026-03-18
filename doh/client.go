@@ -10,17 +10,22 @@ import (
 	"github.com/miekg/dns"
 )
 
+// Version is the version of the doh-go library.
+var Version = "dev"
+
 // Client encapsulates and provides logic for querying DNS servers over DoH.
 type Client struct {
-	addr   string
-	client *http.Client
+	addr      string
+	client    *http.Client
+	userAgent string
 }
 
 // NewClient creates new Client instance with standard net/http client.
 func NewClient(addr string, opts ...Option) *Client {
 	client := &Client{
-		addr:   addr,
-		client: &http.Client{},
+		addr:      addr,
+		client:    &http.Client{},
+		userAgent: "doh-go/" + Version,
 	}
 	for _, opt := range opts {
 		opt.apply(client)
@@ -65,6 +70,7 @@ func (c *Client) SendViaGet(ctx context.Context, msg *dns.Msg) (*dns.Msg, error)
 }
 
 func (c *Client) send(r *http.Request) (*dns.Msg, error) {
+	r.Header.Set("User-Agent", c.userAgent)
 	resp, err := c.client.Do(r)
 	if err != nil {
 		return nil, err

@@ -21,3 +21,18 @@ func WithHTTPClient(c *http.Client) Option {
 		client: c,
 	}
 }
+
+type userAgentOption struct {
+	userAgent string
+}
+
+func (o *userAgentOption) apply(c *Client) {
+	c.userAgent = o.userAgent
+}
+
+// WithUserAgent is a configuration option that overrides default User-Agent header value used by the doh.Client in HTTP requests.
+func WithUserAgent(userAgent string) Option {
+	return &userAgentOption{
+		userAgent: userAgent,
+	}
+}
