@@ -6,12 +6,26 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/miekg/dns"
 )
 
-// Version is the version of the doh-go library.
+// Version is the version of the doh-go library, automatically determined from Go module build info.
 var Version = "dev"
+
+func init() {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+	for _, dep := range info.Deps {
+		if dep.Path == "github.com/tantalor93/doh-go" {
+			Version = dep.Version
+			return
+		}
+	}
+}
 
 // Client encapsulates and provides logic for querying DNS servers over DoH.
 type Client struct {
