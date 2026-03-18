@@ -11,8 +11,8 @@ import (
 	"github.com/miekg/dns"
 )
 
-// Version is the version of the doh-go library, automatically determined from Go module build info.
-var Version = "dev"
+// Version is the version of the doh-go library, determined from Go module build info or "unknown" if unavailable.
+var Version = "unknown"
 
 func init() {
 	info, ok := debug.ReadBuildInfo()
