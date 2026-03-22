@@ -25,7 +25,7 @@ func init() {
 			return
 		}
 	}
-	 Version = info.Main.Version
+	Version = info.Main.Version
 }
 
 // Client encapsulates and provides logic for querying DNS servers over DoH.
