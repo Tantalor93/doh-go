@@ -6,21 +6,41 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/miekg/dns"
 )
 
+// Version is the version of the doh-go library, determined from Go module build info or "unknown" if unavailable.
+var Version = "unknown"
+
+func init() {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+	for _, dep := range info.Deps {
+		if dep.Path == "github.com/tantalor93/doh-go" {
+			Version = dep.Version
+			return
+		}
+	}
+	 Version = info.Main.Version
+}
+
 // Client encapsulates and provides logic for querying DNS servers over DoH.
 type Client struct {
-	addr   string
-	client *http.Client
+	addr      string
+	client    *http.Client
+	userAgent string
 }
 
 // NewClient creates new Client instance with standard net/http client.
 func NewClient(addr string, opts ...Option) *Client {
 	client := &Client{
-		addr:   addr,
-		client: &http.Client{},
+		addr:      addr,
+		client:    &http.Client{},
+		userAgent: "doh-go/" + Version,
 	}
 	for _, opt := range opts {
 		opt.apply(client)
@@ -65,6 +85,7 @@ func (c *Client) SendViaGet(ctx context.Context, msg *dns.Msg) (*dns.Msg, error)
 }
 
 func (c *Client) send(r *http.Request) (*dns.Msg, error) {
+	r.Header.Set("User-Agent", c.userAgent)
 	resp, err := c.client.Do(r)
 	if err != nil {
 		return nil, err

@@ -179,6 +179,126 @@ func Test_SendViaGet(t *testing.T) {
 	}
 }
 
+func Test_SendViaPost_DefaultUserAgent(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "doh-go/"+doh.Version, r.Header.Get("User-Agent"))
+
+		bd, err := io.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		msg := dns.Msg{}
+		err = msg.Unpack(bd)
+		if err != nil {
+			panic(err)
+		}
+		pack, err := msg.Pack()
+		if err != nil {
+			panic(err)
+		}
+		_, err = w.Write(pack)
+		if err != nil {
+			panic(err)
+		}
+	}))
+	defer ts.Close()
+
+	client := doh.NewClient(ts.URL)
+	_, err := client.SendViaPost(context.Background(), question(existingDomain))
+	require.NoError(t, err)
+}
+
+func Test_SendViaPost_CustomUserAgent(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "custom-agent/1.0", r.Header.Get("User-Agent"))
+
+		bd, err := io.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		msg := dns.Msg{}
+		err = msg.Unpack(bd)
+		if err != nil {
+			panic(err)
+		}
+		pack, err := msg.Pack()
+		if err != nil {
+			panic(err)
+		}
+		_, err = w.Write(pack)
+		if err != nil {
+			panic(err)
+		}
+	}))
+	defer ts.Close()
+
+	client := doh.NewClient(ts.URL, doh.WithUserAgent("custom-agent/1.0"))
+	_, err := client.SendViaPost(context.Background(), question(existingDomain))
+	require.NoError(t, err)
+}
+
+func Test_SendViaGet_DefaultUserAgent(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "doh-go/"+doh.Version, r.Header.Get("User-Agent"))
+
+		query := r.URL.Query()
+		dnsQryParam := query.Get("dns")
+		bd, err := base64.RawURLEncoding.DecodeString(dnsQryParam)
+		if err != nil {
+			panic(err)
+		}
+		msg := dns.Msg{}
+		err = msg.Unpack(bd)
+		if err != nil {
+			panic(err)
+		}
+		pack, err := msg.Pack()
+		if err != nil {
+			panic(err)
+		}
+		_, err = w.Write(pack)
+		if err != nil {
+			panic(err)
+		}
+	}))
+	defer ts.Close()
+
+	client := doh.NewClient(ts.URL)
+	_, err := client.SendViaGet(context.Background(), question(existingDomain))
+	require.NoError(t, err)
+}
+
+func Test_SendViaGet_CustomUserAgent(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "custom-agent/1.0", r.Header.Get("User-Agent"))
+
+		query := r.URL.Query()
+		dnsQryParam := query.Get("dns")
+		bd, err := base64.RawURLEncoding.DecodeString(dnsQryParam)
+		if err != nil {
+			panic(err)
+		}
+		msg := dns.Msg{}
+		err = msg.Unpack(bd)
+		if err != nil {
+			panic(err)
+		}
+		pack, err := msg.Pack()
+		if err != nil {
+			panic(err)
+		}
+		_, err = w.Write(pack)
+		if err != nil {
+			panic(err)
+		}
+	}))
+	defer ts.Close()
+
+	client := doh.NewClient(ts.URL, doh.WithUserAgent("custom-agent/1.0"))
+	_, err := client.SendViaGet(context.Background(), question(existingDomain))
+	require.NoError(t, err)
+}
+
 func question(fqdn string) *dns.Msg {
 	q := dns.Msg{}
 	return q.SetQuestion(fqdn, dns.TypeA)
