@@ -86,6 +86,7 @@ func (c *Client) SendViaGet(ctx context.Context, msg *dns.Msg) (*dns.Msg, error)
 
 func (c *Client) send(r *http.Request) (*dns.Msg, error) {
 	r.Header.Set("User-Agent", c.userAgent)
+	// nolint:gosec
 	resp, err := c.client.Do(r)
 	if err != nil {
 		return nil, err
